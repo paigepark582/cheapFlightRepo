@@ -1,0 +1,43 @@
+<script>
+    $("#submit").click(function(){
+                $('#flightTable').empty();
+        $('#flightTable').append(table);
+console.log("click");
+        if($('#flights').css('display')=='none'){
+            $('#flights').toggle();
+        }
+
+
+        var origin=$("#originCity").val();
+        console.log("this is origin"+origin)
+        var dest=$("#dest").val();
+        var startDateFirst=$("#datepicker").val(); 
+        console.log(startDateFirst);
+        var startDate=$("#datepicker").val().split("\/");
+        var startString="";
+        if(startDate.length==3){
+            startString=startDate[2]+ "-"+startDate[0]+ "-"+startDate[1];
+        }
+        var endDate="";
+        var one_way="";
+        if($("#roundtrip").checked){
+            one_way="false";
+        }
+        else{
+            one_way="true";
+        }
+        
+        var nonstop="";
+        if($("#nonstop").checked){
+            nonstop="true";
+        }
+        else{
+            nonstop="false";
+        }
+        var maxPrice="";
+        console.log(origin + dest + startString + endDate + one_way + nonstop + maxPrice);
+        sendReq(origin,dest,startString,endDate,one_way,"",nonstop,maxPrice,[]);
+        
+         
+    });
+</script>

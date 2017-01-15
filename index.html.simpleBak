@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+   <title>Place2Place</title>
+   <head>
+      <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+      <!-- js files for validating aiport codes n shit -->
+      <!-- First include jquery js -->
+      <script src="https://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+      <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+      <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+      <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.css">
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-zh-CN.min.js"></script>
+      <script src="./getRequest.js"></script>
+      <script src="./validateOrigin.js"></script>
+      <script>
+         var table='<table class="table table-striped table-sm table-responsive .table-hover" id="flights">\n<thead>\n<tr>\n<th data-field="destination">Destination</th>\n<th data-field="departure_date">Departure Date</th>\n<th data-field="price">Price</th>\n<th data-field="airline">Airline</th>\n</tr>\n</thead>\n</table>';
+         
+      </script>
+   </head>
+   <body>
+      <center>
+         <div class = "container">
+             
+            <div class = "jumbotron" style = "border-bottom:0;  background-color:#26e29a ">
+               <img src = "LogoFinalwPlane.png">
+            </div>
+            <div id="form">
+               <div  class = "container col-lg-12 col-md-12 col-sm-12">
+                  <input style="width: 300px;" type="text" class="form-control" id="originCity" placeholder="                         Escape From . . ."> 
+                  <br>
+                  <div class="collapse" id="collapseExample">
+                     <input  style="width: 200px;display:inline;" type="text" class="form-control" id="destination" placeholder="Destination"> 
+                     <input style="width: 200px;display:inline;" type="date" class="form-control" id="datepicker" >
+                      <br>
+                      <br>
+                      <script>
+                        var today = new Date().toISOString().split('T')[0];
+                        document.getElementById("datepicker").setAttribute('min', today);
+                      </script>
+                     
+                  </div>
+               </div>
+               <div>
+                   
+                  <button class="btn btn-success" id = "submit" onclick="checkOrigin()">Submit</button><br><br>
+                  <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                  More options
+                  </button>
+                </div>
+                <div id = "thisOne">
+                </div>
+            </div>
+            <div id="flightTable" style="overflow: auto; height: 20em;">
+               <script>
+                  
+                   function checkOrigin(){
+                       var pen;
+                     document.getElementById("thisOne").innerHTML = " ";
+                     var originCityInfo = document.getElementById("originCity").value;
+                      if(originCityInfo.length == 0)
+                          window.alert("Please enter a valid city/airport code");
+                      else   
+                          {
+                              var xhttpx = new XMLHttpRequest();
+                              var apiKey = "kErZer7g1HkP4HkR5WQCVAtMaJuA9DJa";
+                              var url = "https://api.sandbox.amadeus.com/v1.2/airports/autocomplete?apikey="+apiKey+"&term="+originCityInfo+"&country=US&all_airports=false";
+                              xhttpx.onreadystatechange = function() {
+                                  if(this.readyState == 4 && this.status == 200) {
+                                  var json=JSON.parse(this.response);
+                                  var data=json[0].value;
+                                  if (data == undefined){
+                                      window.alert("Please enter a valid city/airport code");
+                                  }
+                                  else
+                                  {
+                                      var temp = document.getElementById("destination").value;
+                                      if(temp.length == 0)
+                                        {
+                                            getFlight(data,pen);
+                                        }
+                                      else  
+                                          checkDestination(data,temp);
+                                      
+                                  }
+                              }
+                          }
+                          xhttpx.open("GET", url, false );
+                          xhttpx.send();
+                          }
+                  }
+                   function checkDestination(originName,desName)
+                   {
+                       if(desName.length == 0)
+                          window.alert("Please enter a valid city/airport code");
+                      else   
+                          {
+                              var xhttpx = new XMLHttpRequest();
+                              var apiKey = "kErZer7g1HkP4HkR5WQCVAtMaJuA9DJa";
+                              var url = "https://api.sandbox.amadeus.com/v1.2/airports/autocomplete?apikey="+apiKey+"&term="+desName+"&country=US&all_airports=false";
+                              xhttpx.onreadystatechange = function() {
+                                  if(this.readyState == 4 && this.status == 200) {
+                                  var json=JSON.parse(this.response);
+                                  var data=json[0].value;
+                                  if (data == undefined){
+                                      window.alert("Please enter a valid city/airport code");
+                                  }
+                                  else
+                                  {
+                                            getFlight(originName,data);
+                                  }
+                              }
+                          }
+                          xhttpx.open("GET", url, false );
+                          xhttpx.send();
+                          }
+                   }
+                   
+                   
+                   
+                   
+                   function getFlight(origin,destination)
+                   {
+                       var date = new Date();
+                       var url = "https://api.sandbox.amadeus.com/v1.2/flights/inspiration-search?apikey=kErZer7g1HkP4HkR5WQCVAtMaJuA9DJa";
+                       var jicURL = "https://api.sandbox.amadeus.com/v1.2/flights/low-fare-search?apikey=kErZer7g1HkP4HkR5WQCVAtMaJuA9DJa";
+                       //if past 7 pm, add a day
+                       if(date.getHours > 19)
+                        {
+                            date.setDate(date.getDate() + 1);
+                        }
+                       var day = date.getDate();
+                       var month = date.getMonth()+1;
+                       var year = date.getFullYear();
+                        if(month < 10)
+                            {
+                                month = "0"+month;
+                            }
+                       var enteredDate = document.getElementById("datepicker").value;
+                       var token = enteredDate.split("-");
+                       
+                       
+                       if(typeof(destination) != "undefined")
+                           {
+                               url+="&origin="+origin+"&destination="+destination;
+                               jicURL+="&origin="+origin+"&destination="+destination;
+                           }
+                               else
+                                   {
+                                       url +="&origin="+origin;
+                                       jicURL+="&origin="+origin;
+                                   }
+                       if(token[0] != "")
+                           {
+                               url += "&departure_date="+token[0]+"-"+token[1]+"-"+token[2];
+                               jicURL+="&departure_date="+token[0]+"-"+token[1]+"-"+token[2];
+                           }
+                        else
+                        {url += "&departure_date="+year+"-"+month+"-"+day;
+                        jicURL+="&departure_date="+year+"-"+month+"-"+day;}
+                       
+                        url+="&one-way=true";
+                       jicURL+="&one-way=true";
+                       
+                        var xhttp = new XMLHttpRequest();
+                        xhttp.onreadystatechange = function() {
+                            
+                            if(this.status == 400)
+    {
+        finalBoss(jicURL,destination);
+    }
+                       else if(this.readyState == 4 && this.status == 200) 
+                        {
+                            document.getElementById("thisOne").innerHTML = " ";
+                            var json = JSON.parse(this.response);
+                            var data = json["results"];
+                            var price = data[0].price;
+                            var destination = data[0].destination;
+                            var airline =  data[0].airline;
+                           
+                            getDestinationName(destination,price,airline);
+                        }
+                       
+                        };
+                        xhttp.open( "GET", url, true );
+                        xhttp.send();
+                   }
+                   
+                   function getDestinationName(destination,price,airline)
+                   {
+                       
+                       
+                              var xhttpx = new XMLHttpRequest();
+                              var apiKey = "kErZer7g1HkP4HkR5WQCVAtMaJuA9DJa";
+                              var url = "https://api.sandbox.amadeus.com/v1.2/airports/autocomplete?apikey="+apiKey+"&term="+destination+"&country=US&all_airports=false";
+                              xhttpx.onreadystatechange = function() {
+                                  if(this.readyState == 4 && this.status == 200) {
+                                  var json=JSON.parse(this.response);
+                                  var data=json[0].label;
+                                      var tempo;
+                            document.getElementById("thisOne").innerHTML = " ";
+                                      
+                                      switch(airline) {
+    case "AA":
+      tempo = "American";
+      break;
+    case "F9":
+      tempo = "Frontier";
+      break;
+    case "UA":
+      tempo = "United";
+      break;
+    case "NK":
+      tempo = "Spirit";
+      break;
+    default:
+      tempo = "Unknown";
+  }
+                           
+                            
+                            var newDiv = document.createElement("div");
+                            var newHeader = document.createElement("h1");
+                            newHeader.innerHTML = "Destination is: "+data;
+                           
+                            var element = document.getElementById("thisOne");
+                            element.appendChild(newHeader);
+                            
+                            newDiv = document.createElement("div");
+                            newHeader = document.createElement("h1");
+                            newHeader.innerHTML = "Cheapest flight is: $"+price;
+                            element.appendChild(newHeader);
+                                      
+                            newDiv = document.createElement("div");
+                            newHeader = document.createElement("h1");
+                            newHeader.innerHTML = "With airline: "+tempo;
+                            element.appendChild(newHeader);
+                                  
+                              }
+                          };
+                          xhttpx.open("GET", url, false );
+                          xhttpx.send();
+                    }
+                   
+                   function finalBoss(url,destinaton)
+                   {
+                       var xhttpx = new XMLHttpRequest();
+                              xhttpx.onreadystatechange = function() {
+                                  if(this.readyState == 4 && this.status == 200) {
+                                  var json=JSON.parse(this.response);
+                                      var price = json.results[0].fare.total_price;
+        var airline =json.results[0].itineraries[0].outbound.flights[0].marketing_airline; 
+                                  
+       var desto = json.results[0].itineraries[0].outbound.flights[0].destination.airport;
+                                      getDestinationName(desto,price,airline)
+                              }
+                          };
+                          xhttpx.open("GET", url, false );
+                          xhttpx.send();   
+                   }
+                   
+               </script>
+            </div>
+         </div>
+      </center>
+   </body>
+</html>
